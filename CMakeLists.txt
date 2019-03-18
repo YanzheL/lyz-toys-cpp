@@ -40,6 +40,8 @@ endmacro()
 
 add_subdirectory(factory)
 
+add_subdirectory(container)
+
 add_library(lyztoys SHARED ${ALL_LYZ_OBJECTS})
 
 add_library(lyztoys_static STATIC ${ALL_LYZ_OBJECTS})
