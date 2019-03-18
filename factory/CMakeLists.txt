@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(lyz_toys_cpp)
+project(lyztoys)
 
 set(CMAKE_CXX_STANDARD 17)
 
