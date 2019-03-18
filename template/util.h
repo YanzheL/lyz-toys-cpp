@@ -7,6 +7,18 @@
 
 #include <tuple>
 
+#define GETTIME(X, MSG)                                              \
+{                                                                    \
+    struct timespec start, finish;                                   \
+    double elapsed;                                                  \
+    clock_gettime(CLOCK_MONOTONIC, &start);                          \
+    X                                                                \
+    clock_gettime(CLOCK_MONOTONIC, &finish);                         \
+    elapsed = (finish.tv_sec - start.tv_sec);                        \
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1e9;               \
+    std::cout <<#MSG<<" time = " << elapsed << "s" << std::endl;     \
+}
+
 namespace lyz {
 
 template<std::size_t I = 0, typename FuncT, typename... Tp>
