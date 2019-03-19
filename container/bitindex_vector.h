@@ -6,17 +6,18 @@
 #define LYZTOYS_BITINDEX_VECTOR_H
 
 #include <memory>
+#include <set>
 
 namespace lyz {
 
-template<class _Tp, class _Allocator = std::allocator<_Tp> >
+template<class _Tp, class _BitSet, class _Allocator = std::allocator<_Tp>, class _Set = std::set<_Tp> >
 class bitindex_vector {
  public:
   typedef _Allocator allocator_type;
   typedef typename _Allocator::value_type value_type;
-  typedef typename _Allocator::reference reference;
-  typedef typename _Allocator::const_reference const_reference;
-  typedef typename _Allocator::difference_type difference_type;
+//  typedef typename _Allocator::reference reference;
+//  typedef typename _Allocator::const_reference const_reference;
+//  typedef typename _Allocator::difference_type difference_type;
   typedef typename _Allocator::size_type size_type;
 
   class iterator {
@@ -90,13 +91,48 @@ class bitindex_vector {
     const_pointer operator->() const;
 //    const_reference operator[](size_type) const; //optional
   };
+  class reference {
+    friend class bitindex_vector<_Tp, _BitSet, _Allocator, _Set>;
+
+    reference(size_type pos, int pack_size, const _Set &atoms, _BitSet &parent);
+
+   public:
+
+    void operator&() = delete; // left undefined
+
+    // copy constructor: compiler generated
+
+    explicit operator _Tp() const;
+
+    reference &operator=(_Tp);// for b[i] = x
+    reference &operator=(const reference &); // for b[i] = b[j]
+
+   private:
+    const int pack_size;
+    const size_type real_pos;
+    size_type atom_idx = 0;
+    _BitSet &parent;
+    const _Set &atoms;
+
+   private:
+    void __do_assign(_Tp);
+  };
 
 //  typedef std::reverse_iterator<iterator> reverse_iterator; //optional
 //  typedef std::reverse_iterator<const_iterator> const_reverse_iterator; //optional
 
-  bitindex_vector();
+  bitindex_vector() noexcept(
+  std::is_nothrow_default_constructible<allocator_type>::value &&
+      std::is_nothrow_default_constructible<_BitSet>::value): __bits_(), __atoms_() {}
   bitindex_vector(const bitindex_vector &);
   ~bitindex_vector();
+
+  explicit bitindex_vector(const _Set &atoms);
+
+  bitindex_vector(const size_type n, const _Set &atoms);
+
+  template<class _InputIterator>
+  bitindex_vector(_InputIterator __first, _InputIterator __last, const _Set &atoms);
 
   bitindex_vector &operator=(const bitindex_vector &);
   bool operator==(const bitindex_vector &) const;
@@ -129,11 +165,11 @@ class bitindex_vector {
 //  void emplace_back(Args...); //optional
 //  void push_front(const _Tp &); //optional
 //  void push_front(_Tp &&); //optional
-//  void push_back(const _Tp &); //optional
-//  void push_back(_Tp &&); //optional
+  void push_back(const _Tp &); //optional
+//  void __push_back(_Tp &&); //optional
 //  void pop_front(); //optional
 //  void pop_back(); //optional
-//  reference operator[](size_type); //optional
+  reference operator[](size_type); //optional
 //  const_reference operator[](size_type) const; //optional
 //  reference at(size_type); //optional
 //  const_reference at(size_type) const; //optional
@@ -155,11 +191,33 @@ class bitindex_vector {
 //  void assign(size_type, const _Tp &); //optional
 
   void swap(bitindex_vector &);
-  size_type size();
-  size_type max_size();
-  bool empty();
+  size_type size() {
+    return __bits_.size()/__pack_size_;
+  }
+  size_type max_size() {
+    return size();
+  }
+  bool empty() {
+    return size()==0;
+  }
 
 //  _Allocator get_allocator(); //optional
+
+ protected:
+  inline void __push_back(const size_type i) {
+    assert(i < 1 << __pack_size_);
+//        if (i < 1 << __pack_size_) {
+    for (int p = 0; p < __pack_size_; ++p) {
+      auto bit = (bool) (i & (1L << p));
+      __bits_.push_back(bit);
+    }
+//        }
+  }
+
+ protected:
+  int __pack_size_ = 1;
+  const _Set &__atoms_;
+  _BitSet __bits_;
 };
 //template<class _Tp, class _Allocator = std::allocator<_Tp> >
 //void swap(bitindex_vector<_Tp, _Allocator> &, bitindex_vector<_Tp, _Allocator> &); //optional
