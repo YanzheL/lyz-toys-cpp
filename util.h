@@ -6,6 +6,38 @@
 #define LYZTOYS_UTIL_H
 
 #include <tuple>
+#include <type_traits>
+
+#define GETTIME(X, MSG)                                              \
+{                                                                    \
+    struct timespec start, finish;                                   \
+    double elapsed;                                                  \
+    clock_gettime(CLOCK_MONOTONIC, &start);                          \
+    {X}                                                              \
+    clock_gettime(CLOCK_MONOTONIC, &finish);                         \
+    elapsed = (finish.tv_sec - start.tv_sec);                        \
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1e9;               \
+    std::cout <<#MSG<<" time = " << elapsed << "s" << std::endl;     \
+}
+
+#define GETTIME_HIGH(X, MSG)                                                      \
+{                                                                                 \
+  auto t_start = std::chrono::high_resolution_clock::now();                       \
+  { X }                                                                           \
+  auto t_end = std::chrono::high_resolution_clock::now();                         \
+  double dur = std::chrono::duration<double, std::nano>(t_end - t_start).count(); \
+  long s = (long) (dur / 1e9);                                                    \
+  long ms = (long) ((dur / 1e6) - s * 1e3);                                       \
+  long us = (long) ((dur / 1e3) - s * 1e6 - ms * 1e3);                            \
+  long ns = ((long) dur) % 1000;                                                  \
+  std::cout << #MSG                                                               \
+  << " time = "                                                                   \
+  << s << " s "                                                                   \
+  << ms << " ms "                                                                 \
+  << us << " us "                                                                 \
+  << ns << " ns"                                                                  \
+  << std::endl;                                                                   \
+}
 
 namespace lyz {
 
@@ -21,5 +53,8 @@ for_each_in_tuple(std::tuple<Tp...> &t, FuncT f) {
 }
 
 }
+
+#define HAS_MEMBER_FUNC(type, name)                             \
+(std::is_member_function_pointer<decltype(&type::name)>::value)
 
 #endif //LYZTOYS_UTIL_H
