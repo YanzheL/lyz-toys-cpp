@@ -4,13 +4,14 @@
 
 #include "cached_factory.h"
 #include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace lyz;
 
-using SomeHeavyClass = string;
+using SomeHeavyClass = vector<string>;
 
 int main() {
-  shared_ptr<SomeHeavyClass> obj = CachedFactory::getInstance<SomeHeavyClass>("Arg0");
-  cout << *obj << endl;
+  auto obj = CachedFactory::createInstance<SomeHeavyClass>(10, "Arg0");
+  cout << (*obj)[0] << endl;
 }
