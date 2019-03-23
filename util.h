@@ -2,8 +2,8 @@
 // Created by LI YANZHE on 3/18/19.
 //
 
-#ifndef LYZTOYS_TEMPLATE_UTIL_H
-#define LYZTOYS_TEMPLATE_UTIL_H
+#ifndef LYZTOYS_UTIL_H
+#define LYZTOYS_UTIL_H
 
 #include <tuple>
 
@@ -22,4 +22,4 @@ for_each_in_tuple(std::tuple<Tp...> &t, FuncT f) {
 
 }
 
-#endif //LYZTOYS_TEMPLATE_UTIL_H
+#endif //LYZTOYS_UTIL_H
