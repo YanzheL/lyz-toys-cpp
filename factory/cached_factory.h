@@ -22,17 +22,18 @@ namespace lyz {
 class CachedFactory {
  public:
   template<class T>
-  static void putInstance(T *ins) {
-    putInstance<T>(ins, std::hash<T>());
+  static std::shared_ptr<T> putInstance(T *ins) {
+    return putInstance<T>(ins, std::hash<T>());
   }
 
   template<class T>
-  static void putInstance(T *ins, std::function<std::size_t(const T &)> hfunc) {
+  static std::shared_ptr<T> putInstance(T *ins, std::function<std::size_t(const T &)> hfunc) {
     std::lock_guard<std::mutex> guard(m);
     std::size_t id = typeid(T).hash_code();
     id += hfunc(*ins);
     std::shared_ptr<T> p(ins);
     instances[id] = boost::any(p);
+    return p;
   }
 
   template<class T>
@@ -40,7 +41,7 @@ class CachedFactory {
     std::lock_guard<std::mutex> guard(m);
     std::size_t id = typeid(T).hash_code() + ins_id;
     auto itr = instances.find(id);
-    if (itr!=instances.end()) {
+    if (itr != instances.end()) {
       return boost::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
       return nullptr;
@@ -52,7 +53,7 @@ class CachedFactory {
     std::lock_guard<std::mutex> guard(m);
     auto id = calculateId<T>(params...);
     auto itr = instances.find(id);
-    if (itr!=instances.end()) {
+    if (itr != instances.end()) {
       return boost::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
       std::shared_ptr<T> ins;
