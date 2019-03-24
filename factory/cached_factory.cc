@@ -6,5 +6,5 @@
 
 using namespace lyz;
 
-std::unordered_map<unsigned long, std::any> CachedFactory::instances;
+std::unordered_map<unsigned long, boost::any> CachedFactory::instances;
 std::mutex CachedFactory::m;

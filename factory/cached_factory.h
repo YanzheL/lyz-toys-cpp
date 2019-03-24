@@ -10,6 +10,7 @@
 #include <any>
 #include <mutex>
 #include <unordered_map>
+#include <boost/any.hpp>
 #include "../util.h"
 //#define CACHED_FACTORY_PRINT_TIME
 #ifdef CACHED_FACTORY_PRINT_TIME
@@ -31,7 +32,7 @@ class CachedFactory {
     std::size_t id = typeid(T).hash_code();
     id += hfunc(*ins);
     std::shared_ptr<T> p(ins);
-    instances[id] = std::any(p);
+    instances[id] = boost::any(p);
   }
 
   template<class T>
@@ -40,7 +41,7 @@ class CachedFactory {
     std::size_t id = typeid(T).hash_code() + ins_id;
     auto itr = instances.find(id);
     if (itr!=instances.end()) {
-      return std::any_cast<std::shared_ptr<T>>(itr->second);
+      return boost::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
       return nullptr;
     }
@@ -52,7 +53,7 @@ class CachedFactory {
     auto id = calculateId<T>(params...);
     auto itr = instances.find(id);
     if (itr!=instances.end()) {
-      return std::any_cast<std::shared_ptr<T>>(itr->second);
+      return boost::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
       std::shared_ptr<T> ins;
 #ifdef CACHED_FACTORY_PRINT_TIME
@@ -60,14 +61,14 @@ class CachedFactory {
 #else
       ins = std::make_shared<T>(params...);
 #endif
-      instances[id] = std::any(ins);
+      instances[id] = boost::any(ins);
       return ins;
     }
   }
 
  private:
   static std::mutex m;
-  static std::unordered_map<std::size_t, std::any> instances;
+  static std::unordered_map<std::size_t, boost::any> instances;
 
   template<class T, typename ...Arg>
   static std::size_t calculateId(Arg &&... param1) {
