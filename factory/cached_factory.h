@@ -7,10 +7,16 @@
 
 #include <functional>
 #include <memory>
-#include <any>
 #include <mutex>
 #include <unordered_map>
 #include "../util.h"
+#if __cplusplus >= 201703L
+#include <any>
+namespace any_provider = std;
+#else
+#include <boost/any.hpp>
+namespace any_provider = boost;
+#endif
 //#define CACHED_FACTORY_PRINT_TIME
 #ifdef CACHED_FACTORY_PRINT_TIME
 #include <iostream>
@@ -21,17 +27,18 @@ namespace lyz {
 class CachedFactory {
  public:
   template<class T>
-  static void putInstance(T *ins) {
-    putInstance<T>(ins, std::hash<T>());
+  static std::shared_ptr<T> putInstance(T *ins) {
+    return putInstance<T>(ins, std::hash<T>());
   }
 
   template<class T>
-  static void putInstance(T *ins, std::function<std::size_t(const T &)> hfunc) {
+  static std::shared_ptr<T> putInstance(T *ins, std::function<std::size_t(const T &)> hfunc) {
     std::lock_guard<std::mutex> guard(m);
     std::size_t id = typeid(T).hash_code();
     id += hfunc(*ins);
     std::shared_ptr<T> p(ins);
-    instances[id] = std::any(p);
+    instances[id] = any_provider::any(p);
+    return p;
   }
 
   template<class T>
@@ -39,8 +46,8 @@ class CachedFactory {
     std::lock_guard<std::mutex> guard(m);
     std::size_t id = typeid(T).hash_code() + ins_id;
     auto itr = instances.find(id);
-    if (itr!=instances.end()) {
-      return std::any_cast<std::shared_ptr<T>>(itr->second);
+    if (itr != instances.end()) {
+      return any_provider::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
       return nullptr;
     }
@@ -51,8 +58,8 @@ class CachedFactory {
     std::lock_guard<std::mutex> guard(m);
     auto id = calculateId<T>(params...);
     auto itr = instances.find(id);
-    if (itr!=instances.end()) {
-      return std::any_cast<std::shared_ptr<T>>(itr->second);
+    if (itr != instances.end()) {
+      return any_provider::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
       std::shared_ptr<T> ins;
 #ifdef CACHED_FACTORY_PRINT_TIME
@@ -60,14 +67,14 @@ class CachedFactory {
 #else
       ins = std::make_shared<T>(params...);
 #endif
-      instances[id] = std::any(ins);
+      instances[id] = any_provider::any(ins);
       return ins;
     }
   }
 
  private:
   static std::mutex m;
-  static std::unordered_map<std::size_t, std::any> instances;
+  static std::unordered_map<std::size_t, any_provider::any> instances;
 
   template<class T, typename ...Arg>
   static std::size_t calculateId(Arg &&... param1) {
