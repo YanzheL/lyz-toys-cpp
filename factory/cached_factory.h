@@ -5,6 +5,8 @@
 #ifndef LYZTOYS_FACTORY_CACHED_FACTORY_H
 #define LYZTOYS_FACTORY_CACHED_FACTORY_H
 
+#include <functional>
+#include <memory>
 #include <any>
 #include <mutex>
 #include <unordered_map>
