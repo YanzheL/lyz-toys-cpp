@@ -15,4 +15,5 @@ using SomeHeavyClass = string;
 int main() {
   shared_ptr<SomeHeavyClass> obj = CachedFactory::createInstanceById<SomeHeavyClass>(10, "Arg0");
   cout << *obj << endl;
+  cout << *CachedFactory::createInstanceById<SomeHeavyClass>(10, "Arg1") << endl;
 }
