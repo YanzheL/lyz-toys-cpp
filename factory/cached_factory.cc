@@ -9,4 +9,4 @@
 using namespace lyz;
 
 std::unordered_map<std::size_t, any_provider::any> CachedFactory::instances;
-std::mutex CachedFactory::m;
+std::unordered_map<std::size_t, std::mutex> CachedFactory::cls_locks;

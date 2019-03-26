@@ -35,8 +35,8 @@ class CachedFactory {
 
   template<class T>
   static std::shared_ptr<T> putInstance(T *ins, std::function<std::size_t(const T &)> hfunc) {
-    std::lock_guard<std::mutex> guard(m);
     std::size_t id = typeid(T).hash_code();
+    std::lock_guard<std::mutex> guard(cls_locks[id]);
     id += hfunc(*ins);
     std::shared_ptr<T> p(ins);
     instances[id] = any_provider::any(p);
@@ -45,7 +45,6 @@ class CachedFactory {
 
   template<class T>
   static std::shared_ptr<T> getInstance(std::size_t ins_id) {
-    std::lock_guard<std::mutex> guard(m);
     std::size_t id = typeid(T).hash_code() + ins_id;
     auto itr = instances.find(id);
     if (itr != instances.end()) {
@@ -57,11 +56,11 @@ class CachedFactory {
 
   template<class T, typename ...Arg>
   static std::shared_ptr<T> createInstanceById(std::size_t id, Arg &&... params) {
-    std::lock_guard<std::mutex> guard(m);
     auto itr = instances.find(id);
     if (itr != instances.end()) {
       return any_provider::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
+      std::lock_guard<std::mutex> guard(cls_locks[typeid(T).hash_code()]);
       std::shared_ptr<T> ins;
 #ifdef CACHED_FACTORY_PRINT_TIME
       GETTIME_HIGH(ins = std::make_shared<T>(params...);, "Class init")
@@ -80,8 +79,8 @@ class CachedFactory {
   }
 
  private:
-  static std::mutex m;
   static std::unordered_map<std::size_t, any_provider::any> instances;
+  static std::unordered_map<std::size_t, std::mutex> cls_locks;
 
   template<class T, typename ...Arg>
   static std::size_t calculateId(Arg &&... param1) {
