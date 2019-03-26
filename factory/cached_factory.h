@@ -56,6 +56,7 @@ class CachedFactory {
 
   template<class T, typename ...Arg>
   static std::shared_ptr<T> createInstanceById(std::size_t id, Arg &&... params) {
+    id += typeid(T).hash_code();
     auto itr = instances.find(id);
     if (itr != instances.end()) {
       return any_provider::any_cast<std::shared_ptr<T>>(itr->second);
@@ -85,7 +86,7 @@ class CachedFactory {
   template<class T, typename ...Arg>
   static std::size_t calculateId(Arg &&... param1) {
     auto &&params_tp = std::forward_as_tuple(std::forward<Arg>(param1)...);
-    std::size_t id = typeid(T).hash_code();
+    std::size_t id = 0;
     for_each_in_tuple(
         params_tp,
         [&](auto x) {
