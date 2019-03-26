@@ -1,6 +1,8 @@
-//
+// =======================================================================
+// Copyright (c) 2016-2020 by LI YANZHE. All rights reserved.
+// Author: LI YANZHE <lee.yanzhe@yanzhe.org>
 // Created by LI YANZHE on 3/18/19.
-//
+// =======================================================================
 
 #ifndef LYZTOYS_FACTORY_CACHED_FACTORY_H
 #define LYZTOYS_FACTORY_CACHED_FACTORY_H
@@ -54,9 +56,8 @@ class CachedFactory {
   }
 
   template<class T, typename ...Arg>
-  static std::shared_ptr<T> createInstance(Arg &&... params) {
+  static std::shared_ptr<T> createInstanceById(std::size_t id, Arg &&... params) {
     std::lock_guard<std::mutex> guard(m);
-    auto id = calculateId<T>(params...);
     auto itr = instances.find(id);
     if (itr != instances.end()) {
       return any_provider::any_cast<std::shared_ptr<T>>(itr->second);
@@ -70,6 +71,12 @@ class CachedFactory {
       instances[id] = any_provider::any(ins);
       return ins;
     }
+  }
+
+  template<class T, typename ...Arg>
+  static std::shared_ptr<T> createInstance(Arg &&... params) {
+    auto id = calculateId<T>(params...);
+    return createInstanceById<T>(id, params...);
   }
 
  private:
