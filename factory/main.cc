@@ -12,6 +12,6 @@ using namespace lyz;
 using SomeHeavyClass = vector<string>;
 
 int main() {
-  auto obj = CachedFactory::createInstance<SomeHeavyClass>(10, "Arg0");
+  auto obj = CachedFactory::createInstance<SomeHeavyClass>(10L, "Arg0");
   cout << (*obj)[0] << endl;
 }

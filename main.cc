@@ -11,6 +11,6 @@ using namespace lyz;
 using SomeHeavyClass = string;
 
 int main() {
-  shared_ptr<SomeHeavyClass> obj = CachedFactory::createInstance<SomeHeavyClass>("Arg0");
+  shared_ptr<SomeHeavyClass> obj = CachedFactory::createInstanceById<SomeHeavyClass>(10, "Arg0");
   cout << *obj << endl;
 }
