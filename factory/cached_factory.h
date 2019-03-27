@@ -7,7 +7,6 @@
 #ifndef LYZTOYS_FACTORY_CACHED_FACTORY_H
 #define LYZTOYS_FACTORY_CACHED_FACTORY_H
 
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -34,8 +33,8 @@ class CachedFactory {
     return putInstance<T>(ins, std::hash<T>());
   }
 
-  template<class T>
-  static std::shared_ptr<T> putInstance(T *ins, std::function<std::size_t(const T &)> hfunc) {
+  template<class T, class HFunc>
+  static std::shared_ptr<T> putInstance(T *ins, HFunc hfunc) {
     auto tid = std::type_index(typeid(T));
     std::lock_guard<std::mutex> guard(cls_locks[tid]);
     std::size_t id = hfunc(*ins);
