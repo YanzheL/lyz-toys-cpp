@@ -10,6 +10,21 @@ set(ALL_LYZ_OBJECTS "" CACHE STRING "" FORCE)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # using Clang
+    find_library(LIBCPP c++)
+    message(STATUS ${LIBCPP})
+    if (LIBCPP)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    endif ()
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # using GCC
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    # using Intel C++
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    # using Visual Studio C++
+endif ()
+
 function(add_lyz_test libname)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/main.cc")
         add_executable(${libname}-test main.cc)
@@ -24,7 +39,7 @@ function(define_module module_name)
     add_library(${LIB_NAME}_object OBJECT ${SRCS})
     add_library(${LIB_NAME} SHARED $<TARGET_OBJECTS:${LIB_NAME}_object>)
     add_library(${LIB_NAME}_static STATIC $<TARGET_OBJECTS:${LIB_NAME}_object>)
-#    set_target_properties(${LIB_NAME}_static PROPERTIES OUTPUT_NAME ${LIB_NAME})
+    #    set_target_properties(${LIB_NAME}_static PROPERTIES OUTPUT_NAME ${LIB_NAME})
     add_lyz_test(${LIB_NAME})
 endfunction()
 
