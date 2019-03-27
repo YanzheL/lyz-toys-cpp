@@ -14,6 +14,18 @@ using namespace lyz;
 using SomeHeavyClass = vector<string>;
 
 int main() {
-  auto obj = CachedFactory::createInstance<SomeHeavyClass>(10L, "Arg0");
+  shared_ptr<SomeHeavyClass> obj;
+  GETTIME_HIGH(
+      for (int i = 0; i < 10000000; ++i) {
+        obj = CachedFactory::createInstance<SomeHeavyClass>(10, "Arg0");
+      },
+      createInstance
+  )
+  GETTIME_HIGH(
+      for (int i = 0; i < 10000000; ++i) {
+        obj = CachedFactory::createInstanceById<SomeHeavyClass>(i, 10, "Arg0");
+      },
+      createInstanceById
+  )
   cout << (*obj)[0] << endl;
 }
