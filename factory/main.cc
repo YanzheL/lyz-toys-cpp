@@ -33,5 +33,12 @@ int main() {
       },
       getInstance
   )
+  GETTIME_HIGH(
+      for (int i = 0; i < 10000000; ++i) {
+        SomeHeavyClass *x = new SomeHeavyClass(10, "Arg0");
+        obj = CachedFactory::putInstance<SomeHeavyClass>(x, [=](const SomeHeavyClass &o) { return i + 10000000; });
+      },
+      putInstance
+  )
   cout << (*obj)[0] << endl;
 }
