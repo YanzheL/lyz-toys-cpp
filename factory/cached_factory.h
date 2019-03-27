@@ -1,6 +1,8 @@
-//
+// =======================================================================
+// Copyright (c) 2016-2020 by LI YANZHE. All rights reserved.
+// Author: LI YANZHE <lee.yanzhe@yanzhe.org>
 // Created by LI YANZHE on 3/18/19.
-//
+// =======================================================================
 
 #ifndef LYZTOYS_FACTORY_CACHED_FACTORY_H
 #define LYZTOYS_FACTORY_CACHED_FACTORY_H
@@ -9,6 +11,7 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <typeindex>
 #include "../util.h"
 #if __cplusplus >= 201703L
 #include <any>
@@ -33,20 +36,20 @@ class CachedFactory {
 
   template<class T>
   static std::shared_ptr<T> putInstance(T *ins, std::function<std::size_t(const T &)> hfunc) {
-    std::lock_guard<std::mutex> guard(m);
-    std::size_t id = typeid(T).hash_code();
-    id += hfunc(*ins);
+    auto tid = std::type_index(typeid(T));
+    std::lock_guard<std::mutex> guard(cls_locks[tid]);
+    std::size_t id = hfunc(*ins);
     std::shared_ptr<T> p(ins);
-    instances[id] = any_provider::any(p);
+    instances[tid][id] = any_provider::any(p);
     return p;
   }
 
   template<class T>
-  static std::shared_ptr<T> getInstance(std::size_t ins_id) {
-    std::lock_guard<std::mutex> guard(m);
-    std::size_t id = typeid(T).hash_code() + ins_id;
-    auto itr = instances.find(id);
-    if (itr != instances.end()) {
+  static std::shared_ptr<T> getInstance(std::size_t id) {
+    auto tid = std::type_index(typeid(T));
+    auto &map = instances[tid];
+    auto itr = map.find(id);
+    if (itr != map.end()) {
       return any_provider::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
       return nullptr;
@@ -54,32 +57,40 @@ class CachedFactory {
   }
 
   template<class T, typename ...Arg>
-  static std::shared_ptr<T> createInstance(Arg &&... params) {
-    std::lock_guard<std::mutex> guard(m);
-    auto id = calculateId<T>(params...);
-    auto itr = instances.find(id);
-    if (itr != instances.end()) {
+  static std::shared_ptr<T> createInstanceById(std::size_t id, Arg &&... params) {
+    auto tid = std::type_index(typeid(T));
+    auto &map = instances[tid];
+    auto itr = map.find(id);
+    if (itr != map.end()) {
       return any_provider::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
+      std::lock_guard<std::mutex> guard(cls_locks[std::type_index(tid)]);
       std::shared_ptr<T> ins;
 #ifdef CACHED_FACTORY_PRINT_TIME
       GETTIME_HIGH(ins = std::make_shared<T>(params...);, "Class init")
 #else
       ins = std::make_shared<T>(params...);
 #endif
-      instances[id] = any_provider::any(ins);
+      map[id] = any_provider::any(ins);
       return ins;
     }
   }
 
+  template<class T, typename ...Arg>
+  static std::shared_ptr<T> createInstance(Arg &&... params) {
+    auto id = calculateId<T>(params...);
+    return createInstanceById<T>(id, params...);
+  }
+
  private:
-  static std::mutex m;
-  static std::unordered_map<std::size_t, any_provider::any> instances;
+  typedef std::unordered_map<std::size_t, any_provider::any> InstanceMap;
+  static std::unordered_map<std::type_index, InstanceMap> instances;
+  static std::unordered_map<std::type_index, std::mutex> cls_locks;
 
   template<class T, typename ...Arg>
   static std::size_t calculateId(Arg &&... param1) {
     auto &&params_tp = std::forward_as_tuple(std::forward<Arg>(param1)...);
-    std::size_t id = typeid(T).hash_code();
+    std::size_t id = 0;
     for_each_in_tuple(
         params_tp,
         [&](auto x) {
