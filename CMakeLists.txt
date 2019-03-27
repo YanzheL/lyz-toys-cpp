@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(lyztoys)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(ALL_LYZ_SUBLIBS "" CACHE STRING "Names of all sub libraries" FORCE)
 
@@ -24,7 +24,7 @@ function(define_module module_name)
     add_library(${LIB_NAME}_object OBJECT ${SRCS})
     add_library(${LIB_NAME} SHARED $<TARGET_OBJECTS:${LIB_NAME}_object>)
     add_library(${LIB_NAME}_static STATIC $<TARGET_OBJECTS:${LIB_NAME}_object>)
-    set_target_properties(${LIB_NAME}_static PROPERTIES OUTPUT_NAME ${LIB_NAME})
+#    set_target_properties(${LIB_NAME}_static PROPERTIES OUTPUT_NAME ${LIB_NAME})
     add_lyz_test(${LIB_NAME})
 endfunction()
 
@@ -44,7 +44,7 @@ add_library(lyztoys SHARED ${ALL_LYZ_OBJECTS})
 
 add_library(lyztoys_static STATIC ${ALL_LYZ_OBJECTS})
 
-set_target_properties(lyztoys_static PROPERTIES OUTPUT_NAME lyztoys)
+#set_target_properties(lyztoys_static PROPERTIES OUTPUT_NAME lyztoys)
 
 add_lyz_test(lyztoys)
 
