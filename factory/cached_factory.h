@@ -64,7 +64,7 @@ class CachedFactory {
     if (itr != map.end()) {
       return any_provider::any_cast<std::shared_ptr<T>>(itr->second);
     } else {
-      std::lock_guard<std::mutex> guard(cls_locks[std::type_index(tid)]);
+      std::lock_guard<std::mutex> guard(cls_locks[tid]);
       std::shared_ptr<T> ins;
 #ifdef CACHED_FACTORY_PRINT_TIME
       GETTIME_HIGH(ins = std::make_shared<T>(params...);, "Class init")
