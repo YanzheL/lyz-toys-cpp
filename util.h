@@ -63,9 +63,27 @@ for_each_in_tuple(std::tuple<Tp...> &t, FuncT f) {
 #include <initializer_list>
 
 template<typename ...Args>
-inline constexpr size_t IDX(const Args... params) {
-  constexpr size_t NDIMS = sizeof...(params) / 2 + 1;
-  std::initializer_list<size_t> args = {params...};
+inline constexpr size_t IDX_V1(const Args... params) {
+  constexpr size_t N = sizeof...(params);
+  constexpr size_t NDIMS = N / 2 + 1;
+  std::initializer_list<size_t> args{params...};
+  auto ibegin = args.begin();
+  auto sbegin = ibegin + NDIMS;
+  size_t res = 0;
+  for (int dim = 0; dim < NDIMS; ++dim) {
+    size_t factor = dim > 0 ? sbegin[dim - 1] : 0;
+    res = res * factor + ibegin[dim];
+  }
+  return res;
+}
+
+#include <array>
+
+template<typename ...Args>
+inline constexpr size_t IDX_V2(const Args... params) {
+  constexpr size_t N = sizeof...(Args);
+  constexpr size_t NDIMS = N / 2 + 1;
+  std::array<size_t, N> args{params...};
   auto ibegin = args.begin();
   auto sbegin = ibegin + NDIMS;
   size_t res = 0;

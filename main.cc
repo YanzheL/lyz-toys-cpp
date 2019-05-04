@@ -16,5 +16,20 @@ int main() {
   shared_ptr<SomeHeavyClass> obj = CachedFactory::createInstanceById<SomeHeavyClass>(10, "Arg0");
   cout << *obj << endl;
   cout << *CachedFactory::createInstanceById<SomeHeavyClass>(10, "Arg1") << endl;
-  cout << (IDX(1, 2, 3, 4, 5) == 33);
+//  int n=5;
+//  std::cout<<IDX_V1(1, 2, 3, 4, n);
+  static_assert(IDX_V1(1, 2, 3, 4, 5) == 33, "failed");
+  static_assert(IDX_V2(1, 2, 3, 4, 5) == 33, "failed");
+  GETTIME_HIGH(
+      for (int i = 0; i < 200000000; ++i) {
+        IDX_V1(1, 2, 3, 4, 5);
+      },
+      V1
+  )
+  GETTIME_HIGH(
+      for (int i = 0; i < 200000000; ++i) {
+        IDX_V2(1, 2, 3, 4, 5);
+      },
+      V2
+  )
 }
