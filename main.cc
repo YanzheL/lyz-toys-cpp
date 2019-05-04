@@ -16,4 +16,5 @@ int main() {
   shared_ptr<SomeHeavyClass> obj = CachedFactory::createInstanceById<SomeHeavyClass>(10, "Arg0");
   cout << *obj << endl;
   cout << *CachedFactory::createInstanceById<SomeHeavyClass>(10, "Arg1") << endl;
+  cout << (IDX(1, 2, 3, 4, 5) == 33);
 }

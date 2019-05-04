@@ -4,6 +4,8 @@ project(lyztoys)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_CXX_FLAGS "-Wno-c++11-narrowing")
+
 set(ALL_LYZ_SUBLIBS "" CACHE STRING "Names of all sub libraries" FORCE)
 
 set(ALL_LYZ_OBJECTS "" CACHE STRING "" FORCE)
