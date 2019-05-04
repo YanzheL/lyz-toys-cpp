@@ -15,15 +15,15 @@
 {                                                                    \
     struct timespec start, finish;                                   \
     double elapsed;                                                  \
-    clock_gettime(CLOCK_MONOTONIC, &start);                          \
+    clock_gettime(CLOCK_MONOTONIC, &start);                         \
     {X}                                                              \
-    clock_gettime(CLOCK_MONOTONIC, &finish);                         \
+    clock_gettime(CLOCK_MONOTONIC, &finish);                        \
     elapsed = (finish.tv_sec - start.tv_sec);                        \
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1e9;               \
     std::cout <<#MSG<<" time = " << elapsed << "s" << std::endl;     \
 }
 
-#define GETTIME_HIGH(X, MSG)                                                      \
+#define GETTIME_HIGH(X, MSG)                                                     \
 {                                                                                 \
   auto t_start = std::chrono::high_resolution_clock::now();                       \
   { X }                                                                           \
