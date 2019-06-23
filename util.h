@@ -94,4 +94,42 @@ inline constexpr size_t IDX_V2(const Args... params) {
   return res;
 }
 
+template<typename R, typename ... Args>
+typename std::enable_if<!std::is_void<R>::value>::type
+call_func(void *function, Args &&... args) {
+  return reinterpret_cast<R(*)(Args...)>(function)(args...);
+}
+
+template<typename R, typename ... Args>
+typename std::enable_if<std::is_void<R>::value>::type
+call_func(void *function, Args &&... args) {
+  reinterpret_cast<R(*)(Args...)>(function)(args...);
+}
+
+template<typename T, typename R, typename ...Args>
+struct GenericMemberFuncType {
+  typedef R (T::*type)(Args...);
+  typedef R return_type;
+};
+
+template<typename T, typename R, typename ...Args>
+typename std::enable_if<std::is_void<R>::value>::type
+member_func_wrapper(
+    typename GenericMemberFuncType<T, R, Args...>::type mfp,
+    T *p,
+    Args...args
+) {
+  (p->*mfp)(args...);
+}
+
+template<typename T, typename R, typename ...Args>
+typename std::enable_if<!std::is_void<R>::value>::type
+member_func_wrapper(
+    typename GenericMemberFuncType<T, R, Args...>::type mfp,
+    T *p,
+    Args...args
+) {
+  return (p->*mfp)(args...);
+}
+
 #endif //LYZTOYS_UTIL_H
