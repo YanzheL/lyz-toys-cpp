@@ -10,6 +10,8 @@
 #include <tuple>
 #include <type_traits>
 #include <chrono>
+#include <initializer_list>
+#include <array>
 
 #define GETTIME(X, MSG)                                              \
 {                                                                    \
@@ -42,6 +44,9 @@
   << std::endl;                                                                   \
 }
 
+#define HAS_MEMBER_FUNC(type, name)                             \
+(std::is_member_function_pointer<decltype(&type::name)>::value)
+
 namespace lyz {
 
 template<std::size_t I = 0, typename FuncT, typename... Tp>
@@ -54,13 +59,6 @@ for_each_in_tuple(std::tuple<Tp...> &t, FuncT f) {
   f(std::get<I>(t));
   for_each_in_tuple<I + 1, FuncT, Tp...>(t, f);
 }
-
-}
-
-#define HAS_MEMBER_FUNC(type, name)                             \
-(std::is_member_function_pointer<decltype(&type::name)>::value)
-
-#include <initializer_list>
 
 template<typename ...Args>
 inline constexpr size_t IDX_V1(const Args... params) {
@@ -76,8 +74,6 @@ inline constexpr size_t IDX_V1(const Args... params) {
   }
   return res;
 }
-
-#include <array>
 
 template<typename ...Args>
 inline constexpr size_t IDX_V2(const Args... params) {
@@ -132,4 +128,5 @@ member_func_wrapper(
   return (p->*mfp)(args...);
 }
 
+}
 #endif //LYZTOYS_UTIL_H
