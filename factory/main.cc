@@ -20,25 +20,25 @@ int main() {
         obj = CachedFactory::createInstance<SomeHeavyClass>(10, "Arg0");
       },
       createInstance
-  )
+  );
   GETTIME_HIGH(
       for (int i = 0; i < 10000000; ++i) {
         obj = CachedFactory::createInstanceById<SomeHeavyClass>(i, 10, "Arg0");
       },
       createInstanceById
-  )
+  );
   GETTIME_HIGH(
       for (int i = 0; i < 10000000; ++i) {
         obj = CachedFactory::getInstance<SomeHeavyClass>(i);
       },
       getInstance
-  )
+  );
   GETTIME_HIGH(
       for (int i = 0; i < 10000000; ++i) {
         SomeHeavyClass *x = new SomeHeavyClass(10, "Arg0");
         obj = CachedFactory::putInstance<SomeHeavyClass>(x, [=](const SomeHeavyClass &o) { return i + 10000000; });
       },
       putInstance
-  )
+  );
   cout << (*obj)[0] << endl;
 }

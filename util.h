@@ -13,8 +13,8 @@
 #include <initializer_list>
 #include <array>
 
-#define GETTIME(X, MSG)                                              \
-{                                                                    \
+#define GETTIME(X, MSG)                                             \
+do {                                                                 \
     struct timespec start, finish;                                   \
     double elapsed;                                                  \
     clock_gettime(CLOCK_MONOTONIC, &start);                         \
@@ -23,10 +23,10 @@
     elapsed = (finish.tv_sec - start.tv_sec);                        \
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1e9;               \
     std::cout <<#MSG<<" time = " << elapsed << "s" << std::endl;     \
-}
+} while(0)
 
 #define GETTIME_HIGH(X, MSG)                                                     \
-{                                                                                 \
+do {                                                                              \
   auto t_start = std::chrono::high_resolution_clock::now();                       \
   { X }                                                                           \
   auto t_end = std::chrono::high_resolution_clock::now();                         \
@@ -42,7 +42,7 @@
   << us << " us "                                                                 \
   << ns << " ns"                                                                  \
   << std::endl;                                                                   \
-}
+} while(0)
 
 #define HAS_MEMBER_FUNC(type, name)                             \
 (std::is_member_function_pointer<decltype(&type::name)>::value)

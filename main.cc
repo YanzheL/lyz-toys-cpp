@@ -25,11 +25,11 @@ int main() {
         IDX_V1(1, 2, 3, 4, 5);
       },
       V1
-  )
+  );
   GETTIME_HIGH(
       for (int i = 0; i < 200000000; ++i) {
         IDX_V2(1, 2, 3, 4, 5);
       },
       V2
-  )
+  );
 }
